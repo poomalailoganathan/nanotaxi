@@ -44,6 +44,7 @@ export default function ConfirmationScreen() {
 
     setLoading(true);
     try {
+      // Use the specified API endpoint for booking confirmation
       const success = await createBooking(
         startLocation,
         endLocation,
@@ -143,7 +144,7 @@ export default function ConfirmationScreen() {
             </View>
             <View style={styles.fareItem}>
               <Text style={styles.fareLabel}>Distance Charges</Text>
-              <Text style={styles.fareValue}>₹{Math.round((fare - 50 - 20 - 40) || 0)}</Text>
+              <Text style={styles.fareValue}>₹{Math.max(0, Math.round((fare - 50 - 20 - 40) || 0))}</Text>
             </View>
             <View style={styles.fareItem}>
               <Text style={styles.fareLabel}>Driver Fee</Text>
@@ -151,7 +152,7 @@ export default function ConfirmationScreen() {
             </View>
             <View style={styles.fareItem}>
               <Text style={styles.fareLabel}>Toll (est.)</Text>
-              <Text style={styles.fareValue}>₹40</Text>
+              <Text style={styles.fareValue}>₹{fare > 150 ? 40 : 0}</Text>
             </View>
             <View style={[styles.fareItem, styles.totalFare]}>
               <Text style={styles.totalLabel}>Total</Text>
@@ -167,10 +168,12 @@ export default function ConfirmationScreen() {
             <TextInput
               style={styles.instructionsInput}
               placeholder="Add pickup instructions (optional)"
+              placeholderTextColor="#9CA3AF"
               value={pickupInstructions}
               onChangeText={setPickupInstructions}
               multiline
               maxLength={200}
+              textAlignVertical="top"
             />
           </View>
           <Text style={styles.instructionsHint}>

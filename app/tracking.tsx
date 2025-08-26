@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import MapView, { Marker } from 'expo-maps';
 import { Phone, MessageSquare, X, Star, User } from 'lucide-react-native';
 import { useBooking } from '@/contexts/BookingContext';
 import { apiGet, apiPost } from '@/services/apiClient';
@@ -177,45 +178,59 @@ export default function TrackingScreen() {
       </View>
 
       <View style={styles.mapContainer}>
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          initialRegion={{
-            latitude: currentBooking.startLocation.latitude,
-            longitude: currentBooking.startLocation.longitude,
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02,
-          }}
-        >
-          <Marker
-            coordinate={{
+        {Platform.OS === 'web' ? (
+          <View style={styles.mapPlaceholder}>
+            <User size={48} color="#6B7280" />
+            <Text style={styles.mapPlaceholderText}>Live Tracking Map</Text>
+            <View style={styles.trackingInfo}>
+              <Text style={styles.trackingText}>📍 Pickup: {currentBooking.startLocation.name}</Text>
+              <Text style={styles.trackingText}>🎯 Destination: {currentBooking.endLocation.name}</Text>
+              {driverLocation && (
+                <Text style={styles.driverLocationText}>
+                  🚗 Driver Location: {driverLocation.latitude.toFixed(4)}, {driverLocation.longitude.toFixed(4)}
+                </Text>
+              )}
+            </View>
+          </View>
+        ) : (
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            initialRegion={{
               latitude: currentBooking.startLocation.latitude,
               longitude: currentBooking.startLocation.longitude,
+              latitudeDelta: 0.02,
+              longitudeDelta: 0.02,
             }}
-            title="Pickup Location"
-            pinColor="#10B981"
-          />
-          
-          <Marker
-            coordinate={{
-              latitude: currentBooking.endLocation.latitude,
-              longitude: currentBooking.endLocation.longitude,
-            }}
-            title="Destination"
-            pinColor="#EF4444"
-          />
-
-          {driverLocation && (
+          >
             <Marker
-              coordinate={driverLocation}
-              title={`${currentBooking.driver?.name}'s Location`}
-            >
-              <View style={styles.driverMarker}>
-                <User size={16} color="#ffffff" />
-              </View>
+              coordinate={{
+                latitude: currentBooking.startLocation.latitude,
+                longitude: currentBooking.startLocation.longitude,
+              }}
+              title="Pickup Location"
             </Marker>
-          )}
-        </MapView>
+            
+            <Marker
+              coordinate={{
+                latitude: currentBooking.endLocation.latitude,
+                longitude: currentBooking.endLocation.longitude,
+              }}
+              title="Destination"
+            />
+
+            {driverLocation && (
+              <Marker
+                coordinate={driverLocation}
+                title={`${currentBooking.driver?.name}'s Location`}
+              >
+                <View style={styles.driverMarker}>
+                  <User size={16} color="#ffffff" />
+                </View>
+              </Marker>
+            )}
+          </MapView>
+        )}
       </View>
 
       <View style={styles.bottomSheet}>

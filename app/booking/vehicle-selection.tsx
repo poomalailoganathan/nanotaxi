@@ -37,10 +37,12 @@ export default function VehicleSelectionScreen() {
 
   const fetchVehicles = async () => {
     try {
+      // Use the specified API endpoint for vehicles
       const response = await apiGet('/api/vehicles');
       setVehicles(response.data);
     } catch (error) {
       console.error('Vehicle fetch error:', error);
+      console.log('Using mock vehicle data for demo');
       // Mock vehicles for demo
       const mockVehicles: Vehicle[] = [
         {
@@ -108,10 +110,12 @@ export default function VehicleSelectionScreen() {
     try {
       const distance = calculateDistance();
       
+      // Use the specified API endpoint for fare calculation
       try {
         const response = await apiGet(`/api/fare?distance=${distance}&vehicleType=${vehicle.type}`);
         setFare(response.data.fare);
       } catch (error) {
+        console.log('Fare calculation API failed, calculating locally');
         // Calculate fare locally
         const baseFare = 50;
         const driverFee = 20;
@@ -121,6 +125,13 @@ export default function VehicleSelectionScreen() {
       }
     } catch (error) {
       console.error('Fare calculation error:', error);
+      // Fallback calculation
+      const distance = calculateDistance();
+      const baseFare = 50;
+      const driverFee = 20;
+      const tollAmount = distance > 10 ? 40 : 0;
+      const totalFare = (distance * vehicle.pricePerKm) + baseFare + driverFee + tollAmount;
+      setFare(Math.round(totalFare));
     }
   };
 

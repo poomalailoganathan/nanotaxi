@@ -10,7 +10,7 @@ export const fetchBaseURL = async (): Promise<string> => {
     return response.data?.base_url || 'https://4c937840d5fd.ngrok-free.app/'; // fallback
   } catch (error) {
     console.warn('❌ Failed to fetch dynamic URL:', error);
-    return 'https://default-api.com'; // fallback
+    return 'https://api.namma-taxi.com'; // fallback to your API domain
   }
 };
 
@@ -25,8 +25,33 @@ export const getApiClient = async (): Promise<AxiosInstance> => {
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     },
   });
+
+  // Add request interceptor for logging
+  api.interceptors.request.use(
+    (config) => {
+      console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+      return config;
+    },
+    (error) => {
+      console.error('❌ API Request Error:', error);
+      return Promise.reject(error);
+    }
+  );
+
+  // Add response interceptor for logging
+  api.interceptors.response.use(
+    (response) => {
+      console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+      return response;
+    },
+    (error) => {
+      console.error(`❌ API Response Error: ${error.response?.status} ${error.config?.url}`, error.response?.data);
+      return Promise.reject(error);
+    }
+  );
 
   return api;
 };

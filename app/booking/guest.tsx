@@ -67,11 +67,13 @@ export default function GuestBookingScreen() {
 
       // Try API call first
       try {
+        // Use the specified API endpoint for guest bookings
         await apiPost('/api/guests/bookings', {
           ...guestBookingData,
           fare,
           pickupInstructions,
         });
+        console.log('Guest booking created successfully');
       } catch (error) {
         console.log('Guest booking API failed, proceeding with mock booking');
       }
