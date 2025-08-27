@@ -210,7 +210,7 @@ export default function TrackingScreen() {
                 longitude: currentBooking.startLocation.longitude,
               }}
               title="Pickup Location"
-            </Marker>
+            />
             
             <Marker
               coordinate={{
@@ -311,6 +311,9 @@ const styles = StyleSheet.create({
     color: '#1F2937',
   },
   mapContainer: {
+    flex: 1,
+  },
+  map: {
     flex: 1,
   },
   mapPlaceholder: {
