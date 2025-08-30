@@ -9,15 +9,29 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { MapView, Marker } from 'expo-maps';
 import { Phone, MessageSquare, X, Star, User } from 'lucide-react-native';
 import { useBooking } from '@/contexts/BookingContext';
 import { apiGet, apiPost } from '@/services/apiClient';
+
+// Conditionally import expo-maps only on native platforms
+let MapView: any = View;
+let Marker: any = View;
+
+if (Platform.OS !== 'web') {
+  try {
+    const ExpoMaps = require('expo-maps');
+    MapView = ExpoMaps.MapView;
+    Marker = ExpoMaps.Marker;
+  } catch (error) {
+    console.log('expo-maps not available:', error);
+  }
+}
 
 export default function TrackingScreen() {
   const router = useRouter();
   const mapRef = useRef<MapView>(null);
   const { currentBooking, setCurrentBooking, rateBooking } = useBooking();
+  const isMounted = useRef(true);
   const [driverLocation, setDriverLocation] = useState(currentBooking?.driver ? {
     latitude: currentBooking.driver.latitude,
     longitude: currentBooking.driver.longitude,
@@ -27,6 +41,8 @@ export default function TrackingScreen() {
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
+    isMounted.current = true;
+    
     if (!currentBooking) {
       router.replace('/(tabs)');
       return;
@@ -34,13 +50,13 @@ export default function TrackingScreen() {
 
     // Simulate driver movement
     const interval = setInterval(() => {
-      if (currentBooking?.driver && driverLocation) {
+      if (currentBooking?.driver && driverLocation && isMounted.current) {
         // Move driver slightly towards pickup location
         const targetLat = currentBooking.startLocation.latitude;
         const targetLng = currentBooking.startLocation.longitude;
         
         setDriverLocation(prev => {
-          if (!prev) return null;
+          if (!prev || !isMounted.current) return prev;
           
           const deltaLat = (targetLat - prev.latitude) * 0.1;
           const deltaLng = (targetLng - prev.longitude) * 0.1;
@@ -55,10 +71,13 @@ export default function TrackingScreen() {
 
     // Simulate ride completion after 30 seconds
     const completionTimer = setTimeout(() => {
-      setShowRating(true);
+      if (isMounted.current) {
+        setShowRating(true);
+      }
     }, 30000);
 
     return () => {
+      isMounted.current = false;
       clearInterval(interval);
       clearTimeout(completionTimer);
     };
@@ -93,7 +112,9 @@ export default function TrackingScreen() {
   };
 
   const cancelRide = () => {
+    if (isMounted.current) {
     setCurrentBooking(null);
+    }
     router.replace('/(tabs)');
   };
 
@@ -110,7 +131,9 @@ export default function TrackingScreen() {
         Alert.alert('Error', 'Failed to submit feedback');
       }
     }
-    setCurrentBooking(null);
+    if (isMounted.current) {
+      setCurrentBooking(null);
+    }
   };
 
   if (!currentBooking) {

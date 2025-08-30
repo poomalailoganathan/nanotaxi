@@ -13,10 +13,23 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
-import { MapView, Marker } from 'expo-maps';
 import { MapPin, Navigation, ArrowRight, CreditCard as Edit3 } from 'lucide-react-native';
 import { Location as LocationType } from '@/types';
 import { apiGet } from '@/services/apiClient';
+
+// Conditionally import expo-maps only on native platforms
+let MapView: any = View;
+let Marker: any = View;
+
+if (Platform.OS !== 'web') {
+  try {
+    const ExpoMaps = require('expo-maps');
+    MapView = ExpoMaps.MapView;
+    Marker = ExpoMaps.Marker;
+  } catch (error) {
+    console.log('expo-maps not available:', error);
+  }
+}
 
 export default function LocationScreen() {
   const router = useRouter();
@@ -39,13 +52,12 @@ export default function LocationScreen() {
   });
 
   useEffect(() => {
+    isMounted.current = true;
+    getCurrentLocation();
+    
     return () => {
       isMounted.current = false;
     };
-  }, []);
-
-  useEffect(() => {
-    getCurrentLocation();
   }, []);
 
   useEffect(() => {
@@ -96,6 +108,8 @@ export default function LocationScreen() {
   }, [currentLocation, destination]);
 
   const getCurrentLocation = async () => {
+    if (!isMounted.current) return;
+    
     setLoading(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -109,9 +123,11 @@ export default function LocationScreen() {
           latitude: 12.9716,
           longitude: 77.5946,
         };
-        setCurrentLocation(defaultLocation);
-        setStartLocationQuery(defaultLocation.name);
-        setLoading(false);
+        if (isMounted.current) {
+          setCurrentLocation(defaultLocation);
+          setStartLocationQuery(defaultLocation.name);
+          setLoading(false);
+        }
         return;
       }
 
@@ -170,8 +186,10 @@ export default function LocationScreen() {
         latitude: 12.9716,
         longitude: 77.5946,
       };
-      setCurrentLocation(defaultLocation);
-      setStartLocationQuery(defaultLocation.name);
+      if (isMounted.current) {
+        setCurrentLocation(defaultLocation);
+        setStartLocationQuery(defaultLocation.name);
+      }
     } finally {
       if (isMounted.current) {
         setLoading(false);
@@ -180,6 +198,8 @@ export default function LocationScreen() {
   };
 
   const searchLocations = async (query: string, type: 'start' | 'destination') => {
+    if (!isMounted.current) return;
+    
     setSearchLoading(true);
     try {
       // Use the specified API endpoint for location search
