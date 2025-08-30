@@ -68,17 +68,15 @@ export default function ProfileScreen() {
       Alert.alert(
         'Message Sent',
         'Your support message has been sent. We will get back to you soon!',
-        [{ text: 'OK', onPress: () => setSupportMessage('') }]
+        [{ text: 'OK', onPress: () => { setSupportMessage(''); setShowSupport(false); } }]
       );
     } catch (error) {
       Alert.alert(
         'Message Sent',
         'Your support message has been received. We will get back to you soon!',
-        [{ text: 'OK', onPress: () => setSupportMessage('') }]
+        [{ text: 'OK', onPress: () => { setSupportMessage(''); setShowSupport(false); } }]
       );
     }
-    
-    setShowSupport(false);
   };
 
   const profileSections = [
@@ -183,8 +181,26 @@ export default function ProfileScreen() {
 
           <Text
             style={styles.messageInput}
-            // Using Text as placeholder for TextInput in demo
-            onPress={() => setSupportMessage('I need help with my booking')}
+            onPress={() => {
+              Alert.prompt(
+                'Support Message',
+                'Enter your message:',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Send',
+                    onPress: (text) => {
+                      if (text) {
+                        setSupportMessage(text);
+                        handleSupportMessage();
+                      }
+                    },
+                  },
+                ],
+                'plain-text',
+                supportMessage
+              );
+            }}
           >
             {supportMessage || 'Type your message here...'}
           </Text>

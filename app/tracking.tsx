@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import MapView, { Marker } from 'expo-maps';
+import { MapView, Marker } from 'expo-maps';
 import { Phone, MessageSquare, X, Star, User } from 'lucide-react-native';
 import { useBooking } from '@/contexts/BookingContext';
 import { apiGet, apiPost } from '@/services/apiClient';
@@ -142,8 +142,23 @@ export default function TrackingScreen() {
           <Text style={styles.feedbackLabel}>Add feedback (optional)</Text>
           <Text
             style={styles.feedbackInput}
-            // Note: Using Text as placeholder for TextInput since we're in demo mode
-            onPress={() => setFeedback('Great ride, thank you!')}
+            onPress={() => {
+              Alert.prompt(
+                'Feedback',
+                'How was your ride?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Save',
+                    onPress: (text) => {
+                      if (text) setFeedback(text);
+                    },
+                  },
+                ],
+                'plain-text',
+                feedback
+              );
+            }}
           >
             {feedback || 'Tap to add feedback...'}
           </Text>

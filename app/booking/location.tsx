@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
-import MapView, { Marker } from 'expo-maps';
+import { MapView, Marker } from 'expo-maps';
 import { MapPin, Navigation, ArrowRight, CreditCard as Edit3 } from 'lucide-react-native';
 import { Location as LocationType } from '@/types';
 import { apiGet } from '@/services/apiClient';
