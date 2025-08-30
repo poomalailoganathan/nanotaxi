@@ -24,5 +24,6 @@
     "experiments": {
       "typedRoutes": true
     }
+    "jsEngine": "jsc"
   }
 }
